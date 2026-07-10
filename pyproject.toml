@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sessionark"
+version = "0.1.0"
+description = "Backup, verify, and safely recover local AI coding-agent sessions."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "SessionArk contributors" }
+]
+keywords = [
+  "codex",
+  "claude-code",
+  "ai-agents",
+  "backup",
+  "jsonl",
+  "recovery"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: System :: Archiving :: Backup"
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/julescules/sessionark"
+Repository = "https://github.com/julescules/sessionark.git"
+Issues = "https://github.com/julescules/sessionark/issues"
+Changelog = "https://github.com/julescules/sessionark/blob/main/CHANGELOG.md"
+
+[project.scripts]
+sessionark = "sessionark.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
