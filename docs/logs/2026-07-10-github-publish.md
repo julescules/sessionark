@@ -43,4 +43,26 @@ No partial release directory was accepted. The retained, checksum-verified stagi
 
 ## Publication status
 
-Publication is in progress. This section will be updated after the repository, push, CI run, tag, and release are verified.
+- Configured the local commit identity as `julescules <131376318+julescules@users.noreply.github.com>`.
+- Created initial commit `f4c174e3934d0a1007ba6ac3f6bca9d2d541255e` (`Initial release of SessionArk`).
+- Created the public repository `https://github.com/julescules/sessionark`.
+- The first push was rejected because the OAuth token lacked the `workflow` scope; the repository remained empty. Browser authorization added only that scope, after which `main` pushed successfully and the remote head matched the local commit.
+- Enabled Issues, disabled the unused wiki, set the repository homepage, and added the topics `ai-agents`, `backup`, `claude-code`, `codex`, `jsonl`, and `recovery`.
+- Removed 166 D:-local intermediate files totaling 2,037,475 bytes after the final wheel and tests were verified. The current wheel was preserved.
+
+GitHub Actions run `29080014418` then failed on macOS while Ubuntu 3.11 passed the full build/install/test/version flow. The evidence-backed causes were:
+
+1. macOS temporary paths use the system `/var` -> `/private/var` symlink; restore rejected this legitimate ancestor before canonicalizing the requested target.
+2. One source-change test compared the lexical `/var` path with the canonical `/private/var` path.
+3. One collision test relied on two Unicode casefold-colliding filenames coexisting on the default APFS filesystem.
+
+No v0.1.0 tag or GitHub Release has been created. The focused cross-platform fix was explicitly approved and implemented: POSIX restore targets are canonicalized before parent identity checks, the source-change test compares canonical paths, and the collision test uses synthetic source descriptors instead of filesystem-dependent Unicode names. Windows reparse rejection and staged restore protections remain enabled.
+
+Post-fix verification before the second push:
+
+- Local tests: 46 total; 45 passed and the POSIX-only symlink test was skipped on Windows as designed.
+- Independent read-only validation found no blocking issue and confirmed that existing/dangling targets, Windows reparse checks, overlap checks, parent/staging identities, and publication-time checks remain intact.
+- Rebuilt and isolated-installed the wheel; installed `vault.py` matched the source byte-for-byte.
+- CI-fix wheel size: 29,278 bytes.
+- CI-fix wheel SHA-256: `83412D9B8636E4AC3073D916BE4F3FE6DFEFBB3B2E50DB9E6E6E61D050EA4F21`.
+- Removed 146 D:-local build/intermediate files totaling 1,857,319 bytes and verified the new wheel remained present.

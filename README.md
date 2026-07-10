@@ -31,7 +31,7 @@ See [the demand research](docs/DEMAND_RESEARCH.md) for the source review and alt
 - Copies the SQLite main/WAL/journal family without opening the provider database, then runs SQLite's online backup API only against that private copy.
 - Deduplicates unchanged objects between snapshots.
 - Computes Codex consistency from the captured objects and records when the provider file set changes during the capture window.
-- Restores through a private sibling staging tree and atomically publishes only to a target that does not exist. Path traversal, drive paths, invalid Windows names, reparse points, and vault overlap are rejected.
+- Restores through a private sibling staging tree and atomically publishes only to a target that does not exist. Path traversal, drive paths, invalid Windows names, Windows reparse points, and vault overlap are rejected; POSIX paths are canonicalized before the real parent identity is pinned.
 - Repairs JSONL into a completion-marked bundle. Invalid records are preserved byte-for-byte as base64; the source is never modified.
 
 SessionArk intentionally does **not** copy `auth.json`, provider settings, caches, attachments, `logs_2.sqlite`, or arbitrary files under the agent home directory.

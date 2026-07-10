@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from sessionark.models import SessionArkError, VaultCorruptionError
+from sessionark.models import SessionArkError, SourceFile, VaultCorruptionError
 from sessionark.vault import (
     create_snapshot,
     initialize_vault,
@@ -216,6 +216,38 @@ class VaultTests(unittest.TestCase):
             restore_snapshot(self.vault, snapshot["snapshot_id"], target)
         self.assertEqual([], list(target.iterdir()))
 
+    def test_existing_dangling_symlink_restore_target_is_refused(self) -> None:
+        snapshot = create_snapshot("codex", self.source, self.vault)
+        target = self.base / "dangling-target"
+        destination = self.base / "must-not-be-created"
+        try:
+            os.symlink(destination, target, target_is_directory=True)
+        except (OSError, NotImplementedError) as error:
+            self.skipTest(f"symlinks unavailable: {error}")
+        self.assertTrue(os.path.lexists(target))
+        with self.assertRaises(SessionArkError):
+            restore_snapshot(self.vault, snapshot["snapshot_id"], target)
+        self.assertFalse(destination.exists())
+
+    @unittest.skipIf(os.name == "nt", "POSIX symlink ancestor behavior")
+    def test_restore_canonicalizes_a_legitimate_symlink_ancestor(self) -> None:
+        snapshot = create_snapshot("codex", self.source, self.vault)
+        real_parent = self.base / "real-parent"
+        real_parent.mkdir()
+        alias_parent = self.base / "alias-parent"
+        try:
+            os.symlink(real_parent, alias_parent, target_is_directory=True)
+        except (OSError, NotImplementedError) as error:
+            self.skipTest(f"symlinks unavailable: {error}")
+        report = restore_snapshot(
+            self.vault,
+            snapshot["snapshot_id"],
+            alias_parent / "restored",
+        )
+        canonical_target = (real_parent / "restored").resolve()
+        self.assertEqual(str(canonical_target), report["target"])
+        self.assertTrue((canonical_target / "state_5.sqlite").is_file())
+
     def test_failed_restore_does_not_publish_partial_tree(self) -> None:
         snapshot = create_snapshot("codex", self.source, self.vault)
         target = self.base / "failed-restore"
@@ -325,13 +357,17 @@ class VaultTests(unittest.TestCase):
 
     def test_casefold_colliding_sources_are_not_silently_deduplicated(self) -> None:
         custom = self.base / "colliding"
-        write_jsonl(custom / "straße.jsonl", [{"id": 1}])
-        write_jsonl(custom / "strasse.jsonl", [{"id": 2}])
-        from sessionark.adapters import collect_source_files
-
-        collected = collect_source_files("custom", custom)
-        self.assertEqual(2, len(collected))
-        with self.assertRaises(SessionArkError):
+        source_path = custom / "source.jsonl"
+        write_jsonl(source_path, [{"id": 1}])
+        root = custom.resolve()
+        collision_sources = [
+            SourceFile("custom", root, source_path.resolve(), "straße.jsonl", "jsonl"),
+            SourceFile("custom", root, source_path.resolve(), "strasse.jsonl", "jsonl"),
+        ]
+        with patch(
+            "sessionark.vault.collect_source_files",
+            return_value=collision_sources,
+        ), self.assertRaises(SessionArkError):
             create_snapshot("custom", custom, self.vault)
 
 

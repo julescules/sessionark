@@ -60,10 +60,11 @@ class RepairTests(unittest.TestCase):
         source.write_text('{"ok":true}\n', encoding="utf-8")
         bundle = self.root / "bundle"
         source_calls = 0
+        resolved_source = source.resolve()
 
         def changing_digest(path: Path) -> str:
             nonlocal source_calls
-            if Path(path) == source:
+            if Path(path).resolve() == resolved_source:
                 source_calls += 1
                 return "a" * 64 if source_calls == 1 else "b" * 64
             return real_sha256_file(Path(path))

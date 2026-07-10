@@ -601,7 +601,9 @@ def _assert_directory_identity(path: Path, identity: tuple[int, int]) -> None:
 def restore_snapshot(vault: Path, snapshot_id: str, target: Path) -> dict[str, Any]:
     vault = open_vault(vault)
     requested_target = target.expanduser().absolute()
-    if path_has_reparse_component(requested_target):
+    if os.path.lexists(requested_target):
+        raise SessionArkError("Restore target must not already exist.")
+    if os.name == "nt" and path_has_reparse_component(requested_target):
         raise SessionArkError("Restore target or one of its parents is a symlink/reparse point.")
     target = requested_target.resolve(strict=False)
     if paths_overlap(vault, target):

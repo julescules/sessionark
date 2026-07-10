@@ -57,7 +57,7 @@ Objects are written under a temporary name, flushed, hashed, then atomically mov
 
 ## Restore boundary
 
-Restore loads a manifest once, verifies that exact object and every referenced CAS object, then writes to a random private sibling directory with exclusive file creation. It verifies every copied hash and renames the complete tree to the requested target. The target must not exist, its parent must already exist, and neither may overlap the vault or pass through a reparse point. Absolute paths, traversal, drive-qualified paths, invalid Windows filename characters, reserved device names (including superscript COM/LPT forms), and trailing-dot/space components are rejected.
+Restore loads a manifest once, verifies that exact object and every referenced CAS object, then writes to a random private sibling directory with exclusive file creation. It verifies every copied hash and renames the complete tree to the requested target. The target must not exist and its canonical parent must already exist. Windows rejects requested paths containing reparse points; POSIX canonicalizes legitimate symlink ancestors before pinning the real parent identity. The target cannot overlap the vault. Absolute manifest paths, traversal, drive-qualified paths, invalid Windows filename characters, reserved device names (including superscript COM/LPT forms), and trailing-dot/space components are rejected.
 
 ## Repair publication
 

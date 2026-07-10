@@ -53,8 +53,8 @@
   - `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, `LICENSE`, `pyproject.toml`, `.gitignore`
 - Retained the current verified build:
   - `builds/sessionark-0.1.0-py3-none-any.whl`
-  - Size after GitHub URL metadata was added: 29,212 bytes
-  - SHA-256 after GitHub URL metadata was added: `DCB6504DB8B3B264B3AC864D11C74BC83206CCFD4B958661086B458403630E68`
+  - Final size after the cross-platform CI fix: 29,278 bytes
+  - Final SHA-256 after the cross-platform CI fix: `83412D9B8636E4AC3073D916BE4F3FE6DFEFBB3B2E50DB9E6E6E61D050EA4F21`
 
 ## Generated intermediates removed
 
