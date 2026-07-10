@@ -1,6 +1,7 @@
 # Operation log — GitHub publication
 
 - Started: 2026-07-10 16:17 +08:00
+- Completed: 2026-07-10 16:43 +08:00
 - Local project: `D:\open-source-projects\sessionark`
 - Intended public repository: `https://github.com/julescules/sessionark`
 - Objective: install GitHub CLI without using C: for generated data, authenticate, publish `main`, verify CI, and create the v0.1.0 release.
@@ -56,7 +57,7 @@ GitHub Actions run `29080014418` then failed on macOS while Ubuntu 3.11 passed t
 2. One source-change test compared the lexical `/var` path with the canonical `/private/var` path.
 3. One collision test relied on two Unicode casefold-colliding filenames coexisting on the default APFS filesystem.
 
-No v0.1.0 tag or GitHub Release has been created. The focused cross-platform fix was explicitly approved and implemented: POSIX restore targets are canonicalized before parent identity checks, the source-change test compares canonical paths, and the collision test uses synthetic source descriptors instead of filesystem-dependent Unicode names. Windows reparse rejection and staged restore protections remain enabled.
+The focused cross-platform fix was explicitly approved and implemented: POSIX restore targets are canonicalized before parent identity checks, the source-change test compares canonical paths, and the collision test uses synthetic source descriptors instead of filesystem-dependent Unicode names. Windows reparse rejection and staged restore protections remain enabled.
 
 Post-fix verification before the second push:
 
@@ -66,3 +67,15 @@ Post-fix verification before the second push:
 - CI-fix wheel size: 29,278 bytes.
 - CI-fix wheel SHA-256: `83412D9B8636E4AC3073D916BE4F3FE6DFEFBB3B2E50DB9E6E6E61D050EA4F21`.
 - Removed 146 D:-local build/intermediate files totaling 1,857,319 bytes and verified the new wheel remained present.
+
+## Final remote verification
+
+- Fix commit: `3d3a9ee156d44866c0543851634d805dc5f37a5f` (`Fix POSIX restore path handling`).
+- GitHub Actions run `29080508400` passed all six Ubuntu/macOS/Windows and Python 3.11/3.13 jobs. Every job built the source distribution and wheel, installed the wheel, ran the tests, and checked the CLI version.
+- Created and pushed annotated tag `v0.1.0` at the verified fix commit.
+- Published non-draft, non-prerelease GitHub Release: `https://github.com/julescules/sessionark/releases/tag/v0.1.0`.
+- Uploaded `sessionark-0.1.0-py3-none-any.whl` (29,278 bytes).
+- GitHub's asset digest and a fresh D:-local re-download both matched SHA-256 `83412D9B8636E4AC3073D916BE4F3FE6DFEFBB3B2E50DB9E6E6E61D050EA4F21`.
+- Removed the downloaded verification copy after the digest comparison; retained the verified local wheel under `builds/`.
+
+The successful run emitted non-blocking deprecation annotations because `actions/checkout@v4` and `actions/setup-python@v5` are being forced from Node.js 20 to Node.js 24. Updating those action majors is a future maintenance task; it did not alter the successful build or test conclusions.
